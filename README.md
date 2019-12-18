@@ -19,7 +19,7 @@ around (kvm, hyperv, and the mac thingy),
 2. Working (fast) internet connection
 
 ## Setup
-#### Download minishift and install release
+#### 1. Download minishift and install release
 
 > I used verseion 1.34.2 but go ahead and always try the newest one
 
@@ -32,7 +32,7 @@ Install it on your system and put it on your PATH so you can actually
 minishift version
 ```
 
-#### Create minishift virtual machine
+#### 2. Create minishift virtual machine
 
 >###### Little word on network connectivity
 >1. Your PC should have internet (>10Mbit) or the installation will be slow as hell
@@ -55,14 +55,74 @@ minishift version
 Now enable all default addons on minishift and enable admin access
 
 ```shell script
-minishift addons install --defaults && echo OK
-minishift addons enable admin-user && echo OK
+minishift addons install --defaults
+minishift addons enable admin-user
 ```
 
->Every command should be terminated with 'OK'. Sometimes, when an error happens while executing the minishift
->command, it actually does not look like an actual error on the first sight and is easily overlooked.
- 
- 
+Now lets create (provision) minishift instance
+
+```shell script
+minishift start --profile myminishiftV1 --vm-driver virtualbox --memory 8GB --cpus=4 --disk-size=50GB --openshift-version=v3.11.0 --host-only-cidr=10.11.12.1/24
+```
+
+>Explanation of the less obvious parameters:
+>
+>--profile - name for the minishift instance (you can have more installed in parallel); choose whatever fits you
+>
+>--host-only-cidr - is the ip/network for the network interface connecting your PC with the minishift;
+> make here a reasonable choice which does not conflict with your networks  
+
+If it worked than you should get something like this and drop back to a shell:
+```
+Login to server ...
+Creating initial project "myproject" ...
+Server Information ...
+OpenShift server started.
+
+The server is accessible via web console at:
+    https://10.11.12.100:8443/console
+
+You are logged in as:
+    User:     developer
+    Password: <any value>
+
+To login as administrator:
+    oc login -u system:admin
+
+
+-- Exporting of OpenShift images is occuring in background process with pid 3736.
+```
+**Please copy that section and store it somewhere because you will need the information later!!!** 
+
+As you can see, the last sentence says that there is still something happening in the background with a 
+process ID of 3736. Open some process monitoring and see if you can find that process and if it is using
+a good portion of the CPU. That is openshift *actually* booting so be patient and wait until it finishes
+its work. It usually takes couple of minutes.
+
+#### 3. Stop minishift and create a snapshot of clean installation
+
+Minishift is up and running and before we proceed to next steps which are definitely more complicated,
+we want to save the current state if form of a Virtualbox snapshot in case something goes wrong, so we do 
+not have to redo the whole setup again.
+
+Now shutdown minishift
+```shell script
+minishift stop
+```
+
+> (Optional but recomended) VirtualBOX tuning for better performance:
+>```shell script
+>VBoxManage modifyvm myminishiftV1 --nictype1 virtio
+>VBoxManage modifyvm myminishiftV1 --nictype2 virtio
+>```
+
+Now take a snapshot of the virtual machine so we can revert back to it when we experience problems
+
+```shell script
+VBoxManage snapshot myminishiftV1 take clean_install
+``` 
+
+
 
 
 
