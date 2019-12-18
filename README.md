@@ -288,6 +288,12 @@ on your pc and use that. How you create a registry is up to you but under Debian
 sudo apt install docker-registry
 ```
 
+or more generic way which works on every OS but you wont be getting security updates automatically
+
+```shell script
+docker run -d -p 5000:5000 --restart=always --name registry registry:2
+```
+
 The docker registry is HTTP only and listens on port 5000 by default. You have to reflect this when yoy use it.
 
 Next thing is to create a hostname for your docker registry on a IP address which can be seen from minishift.
