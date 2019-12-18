@@ -19,7 +19,7 @@ around (kvm, hyperv, and the mac thingy),
 2. Working (fast) internet connection
 
 ## Setup
-####Download minishift and install release
+#### Download minishift and install release
 
 > I used verseion 1.34.2 but go ahead and always try the newest one
 
@@ -32,9 +32,9 @@ Install it on your system and put it on your PATH so you can actually
 minishift version
 ```
 
-####Create minishift virtual machine
+#### Create minishift virtual machine
 
->######Little word on network connectivity
+>###### Little word on network connectivity
 >1. Your PC should have internet (>10Mbit) or the installation will be slow as hell
 >2. Your PC IP address probably comes from from a DHCP server and that fine, we do not need to change that
 >3. **Verify** that you can ping 8.8.8.8 or minishift will not boot
