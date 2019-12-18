@@ -220,15 +220,62 @@ If it is not present or empty, you will not be able to make a connection to till
 oc get svc/tiller -o json
 ```
 
+#### 4. Setup environment
 
+You need to set some environment variables in order to work with Helm:
 
+```shell script
+MINISHIFT_VERSION=`minishift version`
 
+echo Initialising Minishift environment $MINISHIFT_VERSION
+eval $(minishift oc-env)
 
+export TILLER_NAMESPACE=tiller-namespace 
+echo TILLER_NAMESPACE=$TILLER_NAMESPACE
 
-# Note: you will need to export this env var in every shell you wish to use 'helm list' etc
-export TILLER_NAMESPACE=tiller-namespace
+export HELM_HOST="$(minishift ip):$(oc get svc/tiller -o jsonpath='{.spec.ports[0].nodePort}' -n $TILLER_NAMESPACE --as=system:admin)"
+echo HELM_HOST=$HELM_HOST
 
+export TILLER_HOST=$HELM_HOST
+echo TILLER_HOST=$TILLER_HOST
 
+export MINISHIFT_ADMIN_CONTEXT="default/$(oc config view -o jsonpath='{.contexts[?(@.name=="minishift")].context.cluster}')/system:admin"
+echo MINISHIFT_ADMIN_CONTEXT=$MINISHIFT_ADMIN_CONTEXT
+
+export KUBE_CONTEXT="default/$(oc config view -o jsonpath='{.contexts[?(@.name=="minishift")].context.cluster}')/system:admin"
+echo KUBE_CONTEXT=$KUBE_CONTEXT
+```
+
+which gives me this output
+
+```
+Initialising Minishift environment minishift v1.34.2+83ebaab
+TILLER_NAMESPACE=tiller-namespace
+HELM_HOST=10.11.12.100:31172
+TILLER_HOST=10.11.12.100:31172
+MINISHIFT_ADMIN_CONTEXT=default//system:admin
+KUBE_CONTEXT=default//system:admin
+```
+
+and now I can try to check if helm works by getting the versions of client and server part
+```shell script
+helm version
+```
+
+should give you
+```
+Client: &version.Version{SemVer:"v2.16.1", GitCommit:"bbdfe5e7803a12bbdf97e94cd847859890cf4050", GitTreeState:"clean"}
+Server: &version.Version{SemVer:"v2.16.1", GitCommit:"bbdfe5e7803a12bbdf97e94cd847859890cf4050", GitTreeState:"clean"}
+```
+
+If the command hangs, you probably did not set HELM_HOST variable properly.
+
+Now it is time to shutdown and create a new snapshot
+
+```shell script
+minishift stop
+VBoxManage snapshot myminishiftV1 take helm_install
+```
 
 
 
