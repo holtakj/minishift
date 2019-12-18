@@ -332,4 +332,4 @@ minishift config set insecure-registry registry.local:5000
       
 You are ready to go!
 
-Push images into your local reposity and deploy them on minishift!
+Push images into your local repository and deploy them on minishift!
