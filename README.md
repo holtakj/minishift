@@ -49,9 +49,19 @@ minishift version
 >rm -rf ~/.helm/
 >rm -rf ~/.minishift/
 >```
->This will remove **EVERYTHING** from your previous minishift installation and may also mess UP with helm
+>This will **WIPE EVERYTHING** from your previous minishift installation and may also mess UP with helm
 >and kubernetes setups so take special care!
 
+Now enable all default addons on minishift and enable admin access
+
+```shell script
+minishift addons install --defaults && echo OK
+minishift addons enable admin-user && echo OK
+```
+
+>Every command should be terminated with 'OK'. Sometimes, when an error happens while executing the minishift
+>command, it actually does not look like an actual error on the first sight and is easily overlooked.
+ 
  
 
 
