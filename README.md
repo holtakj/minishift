@@ -13,6 +13,7 @@ around (kvm, hyperv, and the mac thingy),
 ## Todos for this guide
 - [x] describe minishift installation process 
 - [ ] describe helm installation process
+- [ ] Upgrade to helm 3.x
  
 ## Prerequisites
 
@@ -130,17 +131,103 @@ First we need to start minishift again.
 minishift start
 ```
 
->root login to minishift (for advanced users)
+>root login to minishift (for advanced users) execute: (or use virtualbox console)
 >```shell script
 >minishift ssh
 >``` 
 >login: docker
-> pass: tcuser
+>
+>pass: tcuser
 >
 >switch to root:
 >```shell script
 >sudo -s
 >```
+
+First step is to setup OC which is the client side to manage openshift on your PC.
+
+
+Now you have to install helm on your PC:
+
+https://github.com/helm/helm/releases
+
+Download und unpack the latest 2.x version as version 3.x is not tested until now.
+Put it on your PATH.
+
+Run this and it should show the client version and complain about acess to "pods" which is fine as we
+did not install the server part until now
+
+```shell script
+helm version
+```
+
+Now lets install minishift client environment:
+
+Run this and it will tell you what to do:
+```shell script
+minishift oc-env
+```
+
+On my system it says to change PATH to this:
+```shell script
+export PATH="$HOME/.minishift/cache/oc/v3.11.0/linux:$PATH"
+```
+
+Run this to verify that the setup works:
+```shell script
+oc status
+```
+
+Now apply these commands to install Tiller which is the server part of helm into minishift.
+Usually tiller is installed directly into kubernetes namespace on minishift but this causes problems
+with openshift versions greater than 3.9.0 so we will create an own namespace for tiller and give it
+ enough rights to do its job.
+
+```shell script
+# first start with activating the admin user addon (again) 
+minishift addon apply admin-user
+
+# now install tiller into its own namespace as superuser
+oc login -u admin -p admin
+oc new-project tiller-namespace
+
+# create a system account for tiller
+oc create sa tiller
+# in a real cluster I wouldn't grant Tiller cluster admin but this is way more easier to set up
+oc adm policy add-cluster-role-to-user cluster-admin -z tiller
+# the default developer user must be able to "see" tiller from outside of minishift
+oc policy add-role-to-user view developer -n tiller-namespace
+oc create role podreader --verb=get,list,watch --resource=pod -n tiller-namespace
+oc adm policy add-role-to-user podreader developer --role-namespace=tiller-namespace -n tiller-namespace
+# our regular developer user must be able to communicate with tiller from outside of minishift
+oc create role portforward --verb=create,get,list,watch --resource=pods/portforward -n tiller-namespace
+oc adm policy add-role-to-user portforward developer --role-namespace=tiller-namespace -n tiller-namespace
+# our regular develpoer should see that the roles are installed when running the wizard to not get warnings
+oc create role rolereader --verb=get,list,watch --resource=roles -n tiller-namespace
+oc adm policy add-role-to-user rolereader developer --role-namespace=tiller-namespace -n tiller-namespace
+# install tiller
+helm init --service-account tiller --tiller-namespace tiller-namespace
+# expose tiller port to the host computer so you can run helm from your PC
+oc expose deployment/tiller-deploy --target-port=tiller --type=NodePort --name=tiller -n tiller-namespace
+```
+
+And we are done. Now lets verify some things because they are critical.
+
+Run this and it should give you a json with the tiller service configuration. Look for 'nodePort' parameter.
+If it is not present or empty, you will not be able to make a connection to tiller.
+
+```shell script
+oc get svc/tiller -o json
+```
+
+
+
+
+
+
+# Note: you will need to export this env var in every shell you wish to use 'helm list' etc
+export TILLER_NAMESPACE=tiller-namespace
+
 
 
 
