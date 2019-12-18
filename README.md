@@ -28,7 +28,7 @@ https://github.com/minishift/minishift/releases
 Install it on your system and put it on your PATH so you can actually
  run this from the command line
 
-```bash
+```shell script
 minishift version
 ```
 
@@ -41,7 +41,18 @@ minishift version
 >4. **Turn OFF** your firewall because it will mess with minishift
 >5. **Accept that** machines deployed in the minishift **will NOT** be accessible from other computers _(This might actually change)_
 
-      
+>In case you already have an installation which does not fit your needs and are OK with replacing it with this
+>than do a complete wipeout like this
+>```shell script
+>minishift delete --force --clear-cache
+>rm -rf ~/.kube
+>rm -rf ~/.helm/
+>rm -rf ~/.minishift/
+>```
+>This will remove **EVERYTHING** from your previous minishift installation and may also mess UP with helm
+>and kubernetes setups so take special care!
+
+ 
 
 
 
