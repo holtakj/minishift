@@ -12,7 +12,8 @@ around (kvm, hyperv, and the mac thingy),
  
 ## Todos for this guide
 - [x] describe minishift installation process 
-- [ ] describe helm installation process
+- [x] describe helm 2.x installation process
+- [ ] describe how to create and remove a test setup - application deployed by helm
 - [ ] Upgrade to helm 3.x
  
 ## Prerequisites
