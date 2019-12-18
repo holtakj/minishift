@@ -320,9 +320,8 @@ sudo systemctl restart docker.service
 
 Now push your image into that registry. It could look like this. I hate the way docker is doing it.
 ```shell script
-docker  tag appimages.bin.t-mobile.at/tframe/tframe-base-image-jdk8-tomcat9:0.6.1 registry.local:5000/tframe/tframe-base-image-jdk8-tomcat9:latest
-docker  tag appimages.bin.t-mobile.at/tframe/tframe-base-image-jdk8-tomcat9:0.6.1 registry.local/tframe/tframe-base-image-jdk8-tomcat9:latest
-docker push registry.local/tframe/tframe-base-image-jdk8-tomcat9:latest
+docker tag myimage:latest registry.local/myimage:latest
+docker push registry.local/myimage:latest
 ```
 
 If it worked, great! Last step is to tell minishift about your new repository. That is fairly easy:
