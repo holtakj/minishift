@@ -13,6 +13,7 @@ around (kvm, hyperv, and the mac thingy),
 ## Todos for this guide
 - [x] describe minishift installation process 
 - [x] describe helm 2.x installation process
+- [x] setup docker repositories
 - [ ] describe how to create and remove a test setup - application deployed by helm
 - [ ] Upgrade to helm 3.x
  
@@ -278,6 +279,58 @@ minishift stop
 VBoxManage snapshot myminishiftV1 take helm_install
 ```
 
+#### 5. Docker registry
 
+You need a docker registry where you can deploy your images to. For development, you can create a docker registry
+on your pc and use that. How you create a registry is up to you but under Debian it is very simple.
 
+```shell script
+sudo apt install docker-registry
+```
+
+The docker registry is HTTP only and listens on port 5000 by default. You have to reflect this when yoy use it.
+
+Next thing is to create a hostname for your docker registry on a IP address which can be seen from minishift.
+Remember when you used the --host-only-cidr=10.11.12.1/24 parameter while initializing minishift? This is your IP.
+Try to ping it.
+
+```shell script
+ping 10.11.12.1
+```
+
+If it work than all you have to do is to enter following into your hosts-file.
+```
+10.11.12.1 registry.local
+```
+
+Now tell your local docker daemon about the registry. Usually you have to configure a insecure registry.
+It os littlebit OS dependent how you do this. Under debian, you would change the file /etc/docker/daemon.json
+to look like this and restart docker for it to take effect.
+
+```json
+{
+    "max-concurrent-uploads" : 1,
+    "insecure-registries" : ["registry.local:5000"]
+}
+```
+
+```shell script
+sudo systemctl restart docker.service
+```
+
+Now push your image into that registry. It could look like this. I hate the way docker is doing it.
+```shell script
+docker  tag appimages.bin.t-mobile.at/tframe/tframe-base-image-jdk8-tomcat9:0.6.1 registry.local:5000/tframe/tframe-base-image-jdk8-tomcat9:latest
+docker  tag appimages.bin.t-mobile.at/tframe/tframe-base-image-jdk8-tomcat9:0.6.1 registry.local/tframe/tframe-base-image-jdk8-tomcat9:latest
+docker push registry.local/tframe/tframe-base-image-jdk8-tomcat9:latest
+```
+
+If it worked, great! Last step is to tell minishift about your new repository. That is fairly easy:
+
+```shell script
+minishift config set insecure-registry registry.local:5000
+```     
       
+You are ready to go!
+
+Push images into your local reposity and deploy them on minishift!
