@@ -11,7 +11,8 @@ around (kvm, hyperv, and the mac thingy),
  it should not play a role weather you install on linux, windows or mac. In theory...
  
 ## Todos for this guide
-- [ ] describe minishift installation process 
+- [x] describe minishift installation process 
+- [ ] describe helm installation process
  
 ## Prerequisites
 
@@ -122,7 +123,24 @@ Now take a snapshot of the virtual machine so we can revert back to it when we e
 VBoxManage snapshot myminishiftV1 take clean_install
 ``` 
 
+#### 3. Install helm and tiller
 
+First we need to start minishift again.
+```shell script
+minishift start
+```
+
+>root login to minishift (for advanced users)
+>```shell script
+>minishift ssh
+>``` 
+>login: docker
+> pass: tcuser
+>
+>switch to root:
+>```shell script
+>sudo -s
+>```
 
 
 
